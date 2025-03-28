@@ -44,7 +44,7 @@ class Library:
             output += f'{book.title} by {book.author} ({book.status})\n'
         return output.strip()
 
-def main():    
+if __name__ == '__main__' :    
     l1 = Library()
     output = []
     while True:
@@ -65,6 +65,3 @@ def main():
 
     for out in output:
         print(out)
-
-if __name__ == '__main__':
-    main()
