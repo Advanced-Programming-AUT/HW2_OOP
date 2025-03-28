@@ -43,24 +43,28 @@ class Library:
         for book in self.books:
             output += f'{book.title} by {book.author} ({book.status})\n'
         return output.strip()
-    
-l1 = Library()
-output = []
-while True:
-    com = shlex.split(input())
-    match com[0]:
-        case 'ADD':
-            output.append(l1.add_book(com[1], com[2]))
-        case 'BORROW':
-            output.append(l1.borrow_book(com[1]))
-        case 'SHOW':
-            output.append(l1.show_books())
-        case 'RETURN':
-            output.append(l1.return_book(com[1]))
-        case 'END':
-            break
-        case _:
-            print('invalid input')
 
-for out in output:
-    print(out)
+def main():    
+    l1 = Library()
+    output = []
+    while True:
+        com = shlex.split(input())
+        match com[0]:
+            case 'ADD':
+                output.append(l1.add_book(com[1], com[2]))
+            case 'BORROW':
+                output.append(l1.borrow_book(com[1]))
+            case 'SHOW':
+                output.append(l1.show_books())
+            case 'RETURN':
+                output.append(l1.return_book(com[1]))
+            case 'END':
+                break
+            case _:
+                print('invalid input')
+
+    for out in output:
+        print(out)
+
+if __name__ == '__main__':
+    main()
