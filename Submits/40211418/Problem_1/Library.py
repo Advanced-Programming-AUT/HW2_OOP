@@ -4,8 +4,16 @@ class Book:
     def __init__(self,title, author):
         self.title = title
         self.author = author
-        self.status = 'Avalable'
-    
+        self._status = 'Avalable'
+
+    @property
+    def status(self):
+        return self._status
+
+    @status.setter
+    def status(self, val):
+        self._status = val
+
     def borrow(self):
         self.status = 'Borrowed'
 
