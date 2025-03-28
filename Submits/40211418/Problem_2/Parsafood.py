@@ -10,11 +10,15 @@ class Food(ABC):
         Food.food_id += 1
 
     @abstractmethod
-    def calculate_price(self) -> float:
+    def calculate_price(self):
         ...
 
     @abstractmethod
     def __add__(self, other):
+        ...
+    
+    @abstractmethod
+    def __mul__(self, other):
         ...
 
 
@@ -22,11 +26,11 @@ class Pizza(Food):
     price_dict = {'Small': 8, 'Medium': 12, 'Large': 16}
     extra_prices_dict = {'Cheese': 2, 'Extra Sauce': 1.5, 'Olives': 1}
 
-    def __init__(self, size, kind, extras=None):
+    def __init__(self, size, kind, extras):
         super().__init__()
         self.size = size
         self.kind = kind
-        self.extras = extras or []
+        self.extras = extras
 
     def calculate_price(self):
         base_price = Pizza.price_dict.get(self.size, 0)
@@ -87,7 +91,7 @@ class Drink(Food):
 
 
 class Order:
-    discounts_dict = {'DISCOUNT10': 10}
+    discounts_dict = {'DISCOUNT10': 10, 'DISCOUNT20': 20}
 
     def __init__(self):
         self.foods = {}
@@ -111,7 +115,7 @@ class Order:
         return self.total_price - self.total_price * discount_percent / 100
 
     def display_order(self):
-        print('Order summary:\n')
+        print('Order summary:')
         for food, quantity in self.foods.items():
             if isinstance(food, Pizza):
                 extras = ' and '.join(food.extras)
@@ -127,8 +131,6 @@ class Order:
 
         print(f'Total Price: ${self.calculate_total()}')
 
-
-# Example usage
 
 if __name__ == '__main__':
     pizza = Pizza("Large", "Pepperoni", extras=["Cheese", "Extra Sauce"])
