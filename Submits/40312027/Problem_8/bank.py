@@ -108,7 +108,7 @@ while True:
     parts = request.split()
     try:
         if parts[0] == "CREATE_USER":
-
+            
             bank.create_user(parts[1], parts[2], parts[3])
         elif parts[0] == "CREATE_ACCOUNT":
             user = bank.users.get(parts[1])
