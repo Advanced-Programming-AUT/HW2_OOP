@@ -1,0 +1,161 @@
+import pickle
+
+
+class User:
+    def __init__(self, username, password, role, balance=0):
+        self.username = username
+        self.password = password
+        self.role = role  # "seller" or "customer"
+        self.balance = balance
+        self.cart = {}
+        self.rated_products = set()
+
+    def add_balance(self, amount):
+        self.balance += amount
+
+    def view_cart(self):
+        return self.cart
+
+    def add_to_cart(self, product, quantity):
+        if product.stock >= quantity:
+            self.cart[product] = quantity
+        else:
+            print("Not enough stock available!")
+
+    def remove_from_cart(self, product):
+        if product in self.cart:
+            del self.cart[product]
+
+    def finalize_order(self):
+        total_price = sum(product.price * quantity for product, quantity in self.cart.items())
+        if self.balance >= total_price:
+            for product, quantity in self.cart.items():
+                product.stock -= quantity
+            self.balance -= total_price
+            self.cart.clear()
+            print("Order placed successfully!")
+        else:
+            print("Insufficient balance!")
+
+    def rate_product(self, product, rating):
+        if product in self.cart and product not in self.rated_products:
+            product.add_rating(rating)
+            self.rated_products.add(product)
+        else:
+            print("You can only rate purchased products once!")
+
+
+class Product:
+    def __init__(self, name, seller, price, stock, category):
+        self.name = name
+        self.seller = seller
+        self.price = price
+        self.stock = stock
+        self.category = category
+        self.ratings = []
+
+    def add_stock(self, amount):
+        self.stock += amount
+
+    def add_rating(self, rating):
+        self.ratings.append(rating)
+
+    def get_average_rating(self):
+        return sum(self.ratings) / len(self.ratings) if self.ratings else 0
+
+
+class Store:
+    def __init__(self):
+        self.users = {}
+        self.products = []
+        self.load_data()
+
+    def save_data(self):
+        with open("store_data.pkl", "wb") as f:
+            pickle.dump((self.users, self.products), f)
+
+    def load_data(self):
+        try:
+            with open("store_data.pkl", "rb") as f:
+                self.users, self.products = pickle.load(f)
+        except FileNotFoundError:
+            self.users = {}
+            self.products = []
+
+    def register(self, username, password, role):
+        if username in self.users:
+            print("Username already exists!")
+        elif len(password) < 8:
+            print("Password must be at least 8 characters long!")
+        else:
+            self.users[username] = User(username, password, role)
+            self.save_data()
+            print("Registration successful!")
+
+    def login(self, username, password):
+        if username in self.users and self.users[username].password == password:
+            return self.users[username]
+        else:
+            print("Invalid credentials!")
+            return None
+
+    def add_product(self, name, seller, price, stock, category):
+        product = Product(name, seller, price, stock, category)
+        self.products.append(product)
+        self.save_data()
+
+    def search_product(self, name=None, price_range=None, category=None):
+        results = []
+        for product in self.products:
+            if name and name.lower() not in product.name.lower():
+                continue
+            if price_range and not (price_range[0] <= product.price <= price_range[1]):
+                continue
+            if category and category.lower() != product.category.lower():
+                continue
+            results.append(product)
+        return results
+
+
+#test case
+store = Store()
+while True:
+    print("\n1. Register\n2. Login\n3. Exit")
+    choice = input("Choose an option: ")
+    if choice == "1":
+        username = input("Enter username: ")
+        password = input("Enter password: ")
+        role = input("Enter role (customer/seller): ")
+        store.register(username, password, role)
+    elif choice == "2":
+        username = input("Enter username: ")
+        password = input("Enter password: ")
+        user = store.login(username, password)
+        if user:
+            if user.role == "seller":
+                while True:
+                    print("\n1. Add Product\n2. Logout")
+                    option = input("Choose an option: ")
+                    if option == "1":
+                        name = input("Enter product name: ")
+                        price = float(input("Enter price: "))
+                        stock = int(input("Enter stock quantity: "))
+                        category = input("Enter category: ")
+                        store.add_product(name, user, price, stock, category)
+                    elif option == "2":
+                        break
+            else:
+                while True:
+                    print("\n1. Search Product\n2. View Cart\n3. Logout")
+                    option = input("Choose an option: ")
+                    if option == "1":
+                        name = input("Enter product name (or leave blank): ")
+                        products = store.search_product(name=name if name else None)
+                        for p in products:
+                            print(f"{p.name} - ${p.price} - {p.stock} in stock")
+                    elif option == "2":
+                        print(user.view_cart())
+                    elif option == "3":
+                        break
+    elif choice == "3":
+        break
